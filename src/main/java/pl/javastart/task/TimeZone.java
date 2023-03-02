@@ -3,6 +3,7 @@ package pl.javastart.task;
 import java.time.ZoneId;
 
 public enum TimeZone {
+    SYSTEM_DEFAULT("Czas lokalny", ZoneId.systemDefault()),
     UTC("UTC", ZoneId.of("UTC")),
     LONDON("Londyn", ZoneId.of("Europe/London")),
     LOS_ANGELES("Los Angeles", ZoneId.of("America/Los_Angeles")),

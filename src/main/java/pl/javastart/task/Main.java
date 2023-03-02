@@ -14,19 +14,14 @@ public class Main {
 
     public void run(Scanner scanner) {
         // uzupełnij rozwiązanie. Korzystaj z przekazanego w parametrze scannera
-
-        ZoneId localZone = ZoneId.of(java.util.TimeZone.getDefault().getID());
-
-        DateTimeFormatter dateTimePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        ZonedDateTime localDateTime = getDateTime(scanner, localZone);
-        String localDateTimeFormatted = localDateTime.format(dateTimePattern);
-        System.out.println("Czas lokalny: " + localDateTimeFormatted);
-
-        printZoneDateTime(localDateTime, dateTimePattern);
+                
+        ZonedDateTime localDateTime = getDateTime(scanner);
+        printZoneDateTime(localDateTime);
 
     }
 
-    private void printZoneDateTime(ZonedDateTime localDateTime, DateTimeFormatter dateTimePattern) {
+    private void printZoneDateTime(ZonedDateTime localDateTime) {
+        DateTimeFormatter dateTimePattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         for (TimeZone timeZone : TimeZone.values()) {
             ZonedDateTime zoneDateTime = localDateTime.withZoneSameInstant(timeZone.getTimeZoneId());
             String zoneDateTimeFormatted = zoneDateTime.format(dateTimePattern);
@@ -35,29 +30,40 @@ public class Main {
 
     }
 
-    private ZonedDateTime getDateTime(Scanner scanner, ZoneId localZone) {
+    private ZonedDateTime getDateTime(Scanner scanner) {
+        ZoneId localZone = ZoneId.systemDefault();
+        boolean error = true;
         String timeInput = "00:00:00";
         LocalDate createdDate;
-        System.out.println("Podaj datę:");
-
-        String[] dateAndTime = scanner.nextLine().split(" ");
-        String dateInput = dateAndTime[0].replace(".", "-");
-        if (dateAndTime.length == 2) {
-            timeInput = dateAndTime[1];
-        }
+        LocalDateTime dateTime = null;
 
         DateTimeFormatter datePatternDayFirst = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-        DateTimeFormatter datePatternDayLast = DateTimeFormatter.ofPattern("yyy-MM-dd");
+        DateTimeFormatter datePatternDayLast = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timePattern = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-        try {
-            createdDate = LocalDate.parse(dateInput, datePatternDayFirst);
-        } catch (DateTimeParseException e) {
-            createdDate = LocalDate.parse(dateInput, datePatternDayLast);
-        }
+        do {
+            System.out.println("Podaj datę:");
+            String inputDateTime = scanner.nextLine();
+            String[] dateAndTime = inputDateTime.split(" ");
+            String dateInput = dateAndTime[0].replace(".", "-");
+            if (dateInput.split("-").length != 3) {
+                System.out.println("Zły format daty.");
+            } else {
+                error = false;
+                if (dateAndTime.length == 2) {
+                    timeInput = dateAndTime[1];
+                }
+                try {
+                    createdDate = LocalDate.parse(dateInput, datePatternDayFirst);
+                } catch (DateTimeParseException e) {
+                    createdDate = LocalDate.parse(dateInput, datePatternDayLast);
+                }
 
-        LocalTime createTime = LocalTime.parse(timeInput, timePattern);
-        LocalDateTime dateTime = LocalDateTime.of(createdDate, createTime);
+                LocalTime createTime = LocalTime.parse(timeInput, timePattern);
+                dateTime = LocalDateTime.of(createdDate, createTime);
+            }
+            
+        } while (error);
 
         return ZonedDateTime.of(dateTime, localZone);
 
